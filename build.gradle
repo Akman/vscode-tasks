@@ -1,0 +1,290 @@
+/*
+    VSCode Tasks Gradle Plugin
+
+    https://github.com/akman/vscode-tasks
+
+    The MIT License (MIT)
+
+    Copyright (C) 2020 Alexander Kapitman <akman.ru@gmail.com>
+
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom
+    the Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'codenarc'
+    id 'jacoco'
+    id 'com.gradle.plugin-publish' version '0.10.1'
+    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'net.researchgate.release' version '2.8.1'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+}
+
+sourceSets {
+    functionalTest {
+    }
+}
+
+[compileGroovy, compileTestGroovy]*.options*.encoding = 'UTF-8'
+
+configurations.functionalTestImplementation.extendsFrom(
+    configurations.testImplementation)
+
+task functionalTest(type: Test) {
+    description = 'Runs the functional tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    mustRunAfter test
+}
+
+check.dependsOn functionalTest
+
+gradlePlugin {
+    testSourceSets sourceSets.functionalTest
+    plugins {
+        tasksPlugin {
+            id = 'ru.akman.vscode-tasks'
+            implementationClass = 'ru.akman.vscode.TasksPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/akman/vscode-tasks'
+    vcsUrl = 'https://github.com/akman/vscode-tasks'
+    plugins {
+        tasksPlugin {
+            displayName = 'VSCode Tasks Gradle Plugin'
+            description = 'Generates VS Code tasks file'
+            tags = ['vscode', 'tasks']
+        }
+    }
+}
+
+tasks.withType(Test) {
+    testLogging {
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        displayGranularity = -1
+        exceptionFormat = 'short'
+        // showStandardStreams = true
+        events(
+            //'started',
+            'passed',
+            'skipped',
+            'failed',
+            org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
+            //org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+        )
+        debug {
+            displayGranularity = 0
+            exceptionFormat = 'full'
+            events(
+                'started',
+                'passed',
+                'skipped',
+                'failed',
+            )
+        }
+    }
+}
+
+codenarc {
+    toolVersion = '1.5'
+    configFile = file("${projectDir}/config/codenarc/rules.groovy")
+    ignoreFailures = true
+    maxPriority1Violations = 0
+    maxPriority2Violations = 0
+    maxPriority3Violations = 0
+    reportsDir = file("${project.reporting.baseDir}/codenarc")
+    reportFormat = 'html'
+}
+
+jacoco {
+  toolVersion = '0.8.5'
+  reportsDir = file("${project.reporting.baseDir}/jacoco")
+}
+
+jacocoTestReport {
+  reports {
+    xml.enabled true
+    xml.destination file("${project.reporting.baseDir}/jacoco/report.xml")
+    csv.enabled false
+    html.destination file("${project.reporting.baseDir}/jacoco/html")
+  }
+}
+
+build.dependsOn jacocoTestReport
+
+license {
+    ext {
+        projectName = 'VSCode Tasks Gradle Plugin'
+        projectUrl = 'https://github.com/akman/vscode-tasks'
+        inceptionYear = 2020
+        currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        copyrightYear = "${inceptionYear}"
+        if (inceptionYear != currentYear) {
+            copyrightYear += " - ${currentYear}"
+        }
+        copyrightName = 'Alexander Kapitman'
+        copyrightEmail = 'akman.ru@gmail.com'
+    }
+    header file("${projectDir}/config/license/LICENSE")
+    skipExistingHeaders false
+    ignoreFailures true
+    strictCheck true
+    mapping([
+        'groovy': 'JAVADOC_STYLE',
+    ])
+    includes([
+        '**/*.groovy',
+    ])
+    headerDefinitions {
+        javadoc_style {
+            firstLine = '/*'
+            beforeEachLine = '    '
+            endLine = '*/'
+            afterEachLine = ''
+            // skipLinePattern = ''
+            firstLineDetectionPattern = '(\\s|\\t)*/\\*.*$'
+            lastLineDetectionPattern = '.*\\*/(\\s|\\t)*$'
+            allowBlankLines = true
+            isMultiline = true
+            padLines = false
+        }
+        xml_style {
+            firstLine = '<!--'
+            beforeEachLine = '    '
+            endLine = '-->'
+            afterEachLine = ''
+            skipLinePattern = '^<\\?xml.*>$'
+            firstLineDetectionPattern = '(\\s|\\t)*<!--.*$'
+            lastLineDetectionPattern = '.*-->(\\s|\\t)*$'
+            allowBlankLines = true
+            isMultiline = true
+            padLines = false
+        }
+    }
+}
+
+release {
+
+  // Fail when there un-committed changes.
+  failOnCommitNeeded = true
+
+  // Fail when there are local commits that haven't been published upstream.
+  failOnPublishNeeded = true
+
+  // Fail when the project has dependencies on SNAPSHOT versions unless
+  // those SNAPSHOT dependencies have been defined
+  // as 'ignoredSnapshotDependencies' using the syntax '$group:$name'.
+  failOnSnapshotDependencies = true
+
+  // Fail when files are found that are not under version control.
+  failOnUnversionedFiles = true
+
+  // Fail when the source needs to be updated, or there are changes
+  // available upstream that haven't been pulled.
+  failOnUpdateNeeded = true
+
+  // Should the plugin revert it's changes to gradle.properties
+  // when a failure occurs.
+  revertOnFail = true
+
+  // The string template which is used to generate the tag name.
+  // Possible variables are $version and $name.
+  // Always ensure to use single-quotes, otherwise "$" is interpreted
+  // already in your build script.
+  tagTemplate = 'v${version}'
+
+  // This will be prepended to all commits done by the plugin.
+  // A good place for code review, or ticket numbers.
+  preCommitText = ''
+
+  // The commit message used to commit the non-SNAPSHOT version
+  // if SNAPSHOT was used.
+  preTagCommitMessage = 'SNAPSHOT was used to commit the non-SNAPSHOT version'
+
+  // The commit message used when creating the tag.
+  // Not used with BZR projects.
+  tagCommitMessage = 'Release version'
+
+  // The commit message used when committing the next version.
+  newVersionCommitMessage = 'Bump version'
+
+  versionPropertyFile = 'gradle.properties'
+
+  versionProperties = []
+
+  versionPatterns = [
+    /(\d+)\.(\d+)\.(\d+)(.*$)/: { java.util.regex.Matcher m, Project p ->
+        m.replaceAll("${m[0][1]}.${(m[0][2] as int) + 1}.0${m[0][4]}") },
+  ]
+
+  buildTasks = [
+    'build',
+  ]
+
+  ignoredSnapshotDependencies = []
+
+  // (GIT only) If set to the name of a branch, the "release" task will
+  // commit the release on this branch, and the next version
+  // on the working branch.
+  pushReleaseVersionBranch = false
+
+  git {
+
+    // Defines the branch which releases must be done off of.
+    // Eg. set to "release" to require releases are done on
+    // the "release" branch (or use a regular expression to allow releases
+    // from multiple branches, e.g. "/release|master/").
+    // Set to '' to ignore.
+    requireBranch = 'master'
+
+    pushToBranchPrefix = ''
+
+    pushToRemote = 'origin'
+
+    commitVersionFileOnly = false
+
+    // Adds `-s` parameter to the tag command
+    signTag = false
+
+    // Defines an array of options to add to the git adapter during a push.
+    // This could be useful to have the vc hooks skipped during a release.
+    // pushOptions = [
+    //   '--no-verify',
+    // ]
+
+  }
+
+}
+
+defaultTasks 'build'
