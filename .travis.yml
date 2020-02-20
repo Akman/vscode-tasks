@@ -1,0 +1,120 @@
+#   VSCode Tasks Gradle Plugin
+#  
+#   https://github.com/akman/vscode-tasks
+#  
+#   The MIT License (MIT)
+#  
+#   Copyright (C) 2020 Alexander Kapitman <akman.ru@gmail.com>
+#  
+#   Permission is hereby granted, free of charge, to any person obtaining
+#   a copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom
+#   the Software is furnished to do so, subject to the following conditions:
+#  
+#   The above copyright notice and this permission notice shall be included
+#   in all copies or substantial portions of the Software.
+#  
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL
+#   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#   DEALINGS IN THE SOFTWARE.
+
+# Branch value equals:
+#   - name of the branch (TRAVIS_BRANCH) for push builds, or builds not
+#     triggered by a pull request
+#   - name of the branch targeted by the pull request (TRAVIS_BRANCH) for
+#     builds triggered by a pull request
+#   - name of the tag (TRAVIS_TAG) for builds triggered by a tag
+#     CAUTION: For tags, git does not store the branch from which a commit
+#     was tagged, so TRAVIS_BRANCH = TRAVIS_TAG
+
+# if: branch =~ /^v\d+\.\d+\.\d+(-SNAPSHOT.*)?$/
+
+git:
+
+  # Travis CI can clone repositories to a maximum depth of 50 commits,
+  # which is only really useful if you are performing git operations.
+  # Please note that if you use a depth of 1 and have a queue of jobs,
+  # Travis CI won’t build commits that are in the queue when
+  # you push a new commit.
+  # You can also remove the --depth flag entirely, add depth: false
+  
+  depth: false
+
+  # Travis CI clones repositories without the quiet flag (-q) by default.
+  # Enabling the quiet flag can be useful if you’re trying to avoid
+  # log file size limits or even if you just don’t need to include it.
+  
+  quiet: true
+
+matrix:
+
+  # If some rows in the build matrix are allowed to fail, the build won’t be
+  # marked as finished until they have completed. To mark the build as finished
+  # as soon as possible, add fast_finish: true
+
+  fast_finish: true
+
+  include:
+    - os: linux
+      dist: bionic
+      language: java
+      jdk:
+        - openjdk13
+#    - os: osx
+#      osx_image: xcode10.1
+#      language: java
+#      jdk:
+#        - openjdk13
+#    - os: windows
+#      language: bash
+
+cache:
+  directories:
+    - $HOME/.gradle/wrapper/
+    - $HOME/.gradle/caches/
+
+before_install:
+  - chmod a+x ./gradlew
+  - find ./ci -type f -name *.sh -exec chmod a+x {} ';'
+
+install:
+  - ./ci/install.sh
+
+before_script:
+  - source .travis.env
+
+script:
+  - ./gradlew build
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -rf $HOME/.gradle/caches/*/plugin-resolution/
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
+# after_failure:
+
+before_deploy:
+  - ./ci/package.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "aMcP2fctVVLdUReCrbsOnhRc/apQg7P85X7AXhNI+GKWB+ODcVQNL76gjJzSVrLelKn8iB9+4IS2zqrwKeNwd+336XuzmDNUGtFbzZp2dMDHQ4V/VV2WjXpqXemEUMblGIrRrEiBNB0GTww9fQ/mt7OqGDWAJDD6oGjnBAkzKfYhdNxiYDdQbDjulzTcI+nzhqwG/eVQkXD04ov/gE/C8VINOzI7DbmpLGzU+m5xV9KTWbGSFBarNfovC+Rl+lTEZ1+/VUyooM1idbSiHLppcjuAVwdeFaKD8AO9nl5cWpdWQxVkqQc6zZEB5Q9Upu+UtPoQAjL7MFl2SwL0pW0p01KicfeTewURX4iGdv3yyEPEsTpBM1Gytw3jCOLfP6QkhUszKAGUXvtqSxttI5eZBzq92S7CxpTiWTMDnzhDv5li3V1WiyF9cZFhauY5X5fdjUJfwbYBBcU4xXB6GsvYszNBuhb+E3UOo3TeQ0ZHCbnRPnHvIlc0VkcUsFKJmJmmamuzbTYAUyQi62d6vZImdY8q+z0omNSwYBUkQz1VOMXWDZBR81X4QzmMNsFiMvbSmuK4VQO/fRW00nkvUt5tfLkGfnts2MxrSX/38038YCGHg+/8HrrhK813RcIqB6hj9g8GMj94t+02ZwtkmFWeEbBnTPx/QiextT4kWj1Kb28="
+  file_glob: true
+  file: build/distributions/*
+  skip_cleanup: true
+  on:
+    # deployment is triggered if and only if $TRAVIS_TAG is set
+    tags: true
+
+# after_deploy:
+
+# after_script:

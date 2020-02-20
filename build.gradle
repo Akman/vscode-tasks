@@ -143,6 +143,15 @@ jacocoTestReport {
 
 build.dependsOn jacocoTestReport
 
+task packageDistribution(type: Zip) {
+    from "${buildDir}/libs"
+    destinationDirectory = file("${buildDir}/distributions")
+    archiveBaseName = project.name
+    archiveVersion = project.version
+}
+
+build.dependsOn packageDistribution
+
 license {
     ext {
         projectName = 'VSCode Tasks Gradle Plugin'

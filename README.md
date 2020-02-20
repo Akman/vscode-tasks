@@ -1,5 +1,9 @@
 # VSCode Tasks Gradle Plugin
 
+[![Build Status](https://travis-ci.org/akman/vscode-tasks.svg?branch=master)](https://travis-ci.org/akman/vscode-tasks)
+[![Code Coverage](https://codecov.io/gh/akman/vscode-tasks/branch/master/graph/badge.svg)](https://codecov.io/gh/akman/vscode-tasks)
+[![License](https://img.shields.io/github/license/akman/vscode-tasks.svg)](https://github.com/akman/vscode-tasks/blob/master/LICENSE)
+
 This plugin scans your gradle project and configures VS Code to be able
 to run all gradle tasks from within VS Code. It will create or update
 the ***tasks.json*** file in the ***.vscode*** folder for a workspace.
