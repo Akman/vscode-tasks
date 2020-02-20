@@ -33,7 +33,7 @@
 #     CAUTION: For tags, git does not store the branch from which a commit
 #     was tagged, so TRAVIS_BRANCH = TRAVIS_TAG
 
-if: branch =~ /^v\d+\.\d+\.\d+(-SNAPSHOT.*)?$/
+#if: branch =~ /^v\d+\.\d+\.\d+(-SNAPSHOT.*)?$/
 
 git:
 
@@ -107,7 +107,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: "aMcP2fctVVLdUReCrbsOnhRc/apQg7P85X7AXhNI+GKWB+ODcVQNL76gjJzSVrLelKn8iB9+4IS2zqrwKeNwd+336XuzmDNUGtFbzZp2dMDHQ4V/VV2WjXpqXemEUMblGIrRrEiBNB0GTww9fQ/mt7OqGDWAJDD6oGjnBAkzKfYhdNxiYDdQbDjulzTcI+nzhqwG/eVQkXD04ov/gE/C8VINOzI7DbmpLGzU+m5xV9KTWbGSFBarNfovC+Rl+lTEZ1+/VUyooM1idbSiHLppcjuAVwdeFaKD8AO9nl5cWpdWQxVkqQc6zZEB5Q9Upu+UtPoQAjL7MFl2SwL0pW0p01KicfeTewURX4iGdv3yyEPEsTpBM1Gytw3jCOLfP6QkhUszKAGUXvtqSxttI5eZBzq92S7CxpTiWTMDnzhDv5li3V1WiyF9cZFhauY5X5fdjUJfwbYBBcU4xXB6GsvYszNBuhb+E3UOo3TeQ0ZHCbnRPnHvIlc0VkcUsFKJmJmmamuzbTYAUyQi62d6vZImdY8q+z0omNSwYBUkQz1VOMXWDZBR81X4QzmMNsFiMvbSmuK4VQO/fRW00nkvUt5tfLkGfnts2MxrSX/38038YCGHg+/8HrrhK813RcIqB6hj9g8GMj94t+02ZwtkmFWeEbBnTPx/QiextT4kWj1Kb28="
+    secure: "BQPJXAgLK3l4hyZPzNIVfQdbbbEpREJ90Dxy1Sf5WZfH9aWXrTWLNrku+m20nmsu6Sf2DjvRqcntnKYMdOzQ9KdhgCCS2uoTFpGHAwdTyYi0w68Shs0C6zzyYNsjryllkZnKZveI4+xGJ1wpzehQlILdqI1MMedbozkL3KtDLWDTOAjf0RITBY6H3GXl+oUHnEkt8HF8U+Ehbo1CcuuKeaPdn0N37EGvpv9GsH2RYuh2XgXhXRtI+qhjwQ9QaV8vcwHUL+0AwqWw2YvNSCy7MNqstIF9UAC5ib9RTT+N1gjs6gS1VTbP/OGFff4I1KVwyUASNLHbUzxFhAZJdOm6Yt7G0nmG8vqyt/a3uTFwmXafH+QbUBzVfthh0XVcKpg/Ez78SoFRnfD00nj4QqrQrn0wasIcGZm5L85R7AMP5RDtKJJtkuX7QUAyF2oZVVPocU0Jd2YcsQ+vqjhi0MA7B6+d1Wc8jBMFQXow4Npa9uYswiUASZ7sja9CdUpGqobE17mlHhSSUW97XPzMs9QZk22lcbxEHf2OO9LMBZARPpZhXoWD+tjyXwqD5vJ4rgH5xKZiZL9l+3JT0llVi9DK5mdVrboQ7TPavT5RVX09mDINyiRyo4T2dHQZ/d1mNuw2lFqNmCMHKEJDf8H9op1xGb/PGNrHVbaNSJnnh6PKnPQ="
   file_glob: true
   file: build/distributions/*
   skip_cleanup: true
