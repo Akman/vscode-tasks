@@ -39,7 +39,7 @@ import groovy.transform.CompileDynamic
  */
 @CompileDynamic
 class TasksPluginExtension {
-
+    String prefix = ''
     String type = 'shell'
     String command = './gradlew'
     List args = []

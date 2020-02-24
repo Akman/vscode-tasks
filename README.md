@@ -45,6 +45,7 @@ They apply to each task added to the VS Code configuration.
 
 ```groovy
 vscodeTasks {
+    prefix = ''
     type = 'shell'
     command = './gradlew'
     args = []
@@ -81,5 +82,8 @@ vscodeTasks {
 Note that unlike ***json*** syntax, ***groovy*** syntax is used here. Therefore,
 do not forget to replace the curly braces (from json) with square brackets in
 the maps definitions.
+
+- prefix - the prefix used for a task name,
+  if prefix is empty the group name will be used as prefix
 
 [see]: https://code.visualstudio.com/docs/editor/tasks#_custom-tasks

@@ -54,7 +54,6 @@ class TasksPlugin implements Plugin<Project> {
                 final String VERSION_KEY = 'version'
                 final String VERSION_VALUE = '2.0.0'
                 final String TASKS_KEY = 'tasks'
-                final String TASKS_PREFIX = 'gradle: '
                 File settingsDir = new File(project.projectDir, '.vscode')
                 File tasksFile = new File(settingsDir, 'tasks.json')
                 settingsDir.mkdirs()
@@ -69,17 +68,10 @@ class TasksPlugin implements Plugin<Project> {
                     tasksMap[TASKS_KEY] = []
                 }
                 project.tasks.each { projectTask ->
-                    String label = TASKS_PREFIX + projectTask.name
+                    String group = projectTask.group ?: ''
                     String description = projectTask.description ?: ''
-                    String group = 'none'
-                    switch (projectTask.group) {
-                        case 'build':
-                            group = projectTask.group
-                            break
-                        case 'verification':
-                            group = 'test'
-                            break
-                    }
+                    String prefix = extension.prefix ?: group + '-'
+                    String label = prefix.toLowerCase() + projectTask.name
                     boolean hasTask = tasksMap.tasks.any { task ->
                         task.group == group &&
                         task.label == label &&

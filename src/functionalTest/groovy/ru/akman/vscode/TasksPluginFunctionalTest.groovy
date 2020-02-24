@@ -116,7 +116,7 @@ class TasksPluginFunctionalTest extends Specification {
 
         result.output.contains('Update tasks file')
         result.output.contains(
-            'Added task: vscodeTasks [none] - Generates VS Code tasks file.')
+            'Added task: vscodeTasks [IDE] - Generates VS Code tasks file.')
     }
 
     /**
