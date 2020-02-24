@@ -15,7 +15,7 @@ for your project is done in the ***build.gradle*** file.
 
 ```groovy
 plugins {
-    id "ru.akman.vscode-tasks" version "0.2.0"
+    id "ru.akman.vscode-tasks" version "0.4.0"
 }
 ```
 

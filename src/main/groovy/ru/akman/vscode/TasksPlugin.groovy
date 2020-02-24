@@ -68,10 +68,19 @@ class TasksPlugin implements Plugin<Project> {
                     tasksMap[TASKS_KEY] = []
                 }
                 project.tasks.each { projectTask ->
-                    String group = projectTask.group ?: ''
+                    String section = projectTask.group ?: 'other'
                     String description = projectTask.description ?: ''
-                    String prefix = extension.prefix ?: group + '-'
+                    String prefix = extension.prefix ?: section + '-'
                     String label = prefix.toLowerCase() + projectTask.name
+                    String group = 'none'
+                    switch (projectTask.group) {
+                        case 'build':
+                            group = projectTask.group
+                            break
+                        case 'verification':
+                            group = 'test'
+                            break
+                    }                    
                     boolean hasTask = tasksMap.tasks.any { task ->
                         task.group == group &&
                         task.label == label &&
@@ -79,7 +88,7 @@ class TasksPlugin implements Plugin<Project> {
                     }
                     if (!hasTask) {
                         LOG.lifecycle('Added task: ' +
-                            "${projectTask.name} [${group}] - ${description}")
+                            "${label} [${group}] - ${description}")
                         tasksMap.tasks << [
                             // not configurable by extension
                             'group': group,
